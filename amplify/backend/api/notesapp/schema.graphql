@@ -1,6 +1,32 @@
-type Note @model {
-  id: ID!
-  name: String!
-  description: String
-  image: String
+# amplify/backend/api/photo-albums/schema.graphql
+
+type Note
+  @model 
+  @auth(rules: [
+    { allow: owner }
+    { allow: owner, ownerField: "members", queries: [get, list], mutations: null }
+  ]) {
+    id: ID!
+    name: String!
+    owner: String
+    members: [String]
+    photos: [Photo] @connection(name: "AlbumPhotos")
 }
+
+type Photo 
+  @model 
+  @auth(rules: [{allow: owner}]) 
+  @searchable {
+    id: ID!
+    album: Album @connection(name: "AlbumPhotos")
+    bucket: String!
+    fullsize: PhotoS3Info!
+    thumbnail: PhotoS3Info!
+    labels: [String!]
+}
+
+type PhotoS3Info {
+    key: String!
+    width: Int!
+    height: Int!
+} 
